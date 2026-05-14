@@ -5,15 +5,11 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import service.PrintableInfo;
 
 /**
  * Menyimpan detail transaksi pembayaran sebagai bagian komposisi dari Ticket.
- *
- * TODO :
- * 1. Lengkapi constructor, getter, dan setter.
- * 2. Sinkronkan status pembayaran dengan proses pembayaran digital.
- * 3. Uji format waktu dan perubahan status transaksi.
  */
 public class PaymentRecord implements PrintableInfo {
     /************ATRIBUT************/
@@ -22,22 +18,26 @@ public class PaymentRecord implements PrintableInfo {
     private double jumlah;
 
     /************METHOD************/
+    // Menginisialisasi rekam pembayaran dengan status awal PENDING.
     public PaymentRecord() {
         this.waktu = LocalDateTime.now();
-        this.status = "PENDING";  // Status awal pembayaran
+        this.status = "PENDING";
         this.jumlah = 0;
     }
 
+    // Menginisialisasi rekam pembayaran dengan data transaksi tertentu.
     public PaymentRecord(LocalDateTime waktu, String status, double jumlah) {
         setWaktu(waktu);
         setStatus(status);
         setJumlah(jumlah);
     }
 
+    // Mengambil waktu terakhir transaksi pembayaran.
     public LocalDateTime getWaktu() {
         return waktu;
     }
 
+    // Mengatur waktu transaksi dengan validasi tidak null.
     public void setWaktu(LocalDateTime waktu) {
         if (waktu == null) {
             throw new IllegalArgumentException("Waktu transaksi tidak boleh null");
@@ -45,37 +45,49 @@ public class PaymentRecord implements PrintableInfo {
         this.waktu = waktu;
     }
 
+    // Mengambil status pembayaran saat ini.
     public String getStatus() {
         return status;
     }
 
+    // Mengatur status pembayaran hanya untuk nilai yang diizinkan.
     public void setStatus(String status) {
-        // Validasi status pembayaran
-        if (status == null || status.isBlank()) {
-            throw new IllegalArgumentException("Status pembayaran tidak boleh kosong");
+    status = (status == null) ? "" : status.toUpperCase();
+
+        if (!(status.equals("PENDING") || status.equals("COMPLETED") || status.equals("FAILED"))) {
+            throw new IllegalArgumentException("Status tidak valid");
         }
-        if (!status.equals("PENDING") && !status.equals("COMPLETED") && !status.equals("FAILED")) {
-            throw new IllegalArgumentException("Status pembayaran tidak valid");
-        }
+
         this.status = status;
     }
 
+    // Mengambil jumlah nominal pembayaran.
     public double getJumlah() {
         return jumlah;
     }
 
+    // Mengatur nominal pembayaran dengan validasi angka.
     public void setJumlah(double jumlah) {
         if (Double.isNaN(jumlah) || Double.isInfinite(jumlah) || jumlah < 0) {
             throw new IllegalArgumentException("Jumlah pembayaran tidak valid");
         }
-        assert jumlah >= 0 : "Jumlah pembayaran harus >= 0";
         this.jumlah = jumlah;
     }
 
+    // Menyinkronkan status, nominal, dan waktu pembayaran terbaru.
+    public void syncPayment(String newStatus, double amount) {
+        setStatus(newStatus);
+        setJumlah(amount);
+        setWaktu(LocalDateTime.now());
+    }
+
     @Override
+    // Menampilkan detail informasi pembayaran ke konsol.
     public void printInfo() {
-        System.out.println("Waktu Transaksi: " + waktu);
-        System.out.println("Status: " + status);
-        System.out.println("Jumlah: Rp " + String.format("%.2f", jumlah));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        System.out.println("--- Detail Pembayaran ---");
+        System.out.println("Waktu Transaksi : " + waktu.format(formatter));
+        System.out.println("Status          : " + status);
+        System.out.println("Jumlah          : Rp " + String.format("%,.2f", jumlah));
     }
 }

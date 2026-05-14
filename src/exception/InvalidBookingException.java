@@ -7,10 +7,6 @@ package exception;
 /**
  * Exception untuk menangani kondisi data pemesanan tidak memenuhi aturan.
  *
- * TODO:
- * 1. Tentukan aturan booking yang memicu exception.
- * 2. Standarisasi kode/pesan error booking.
- * 3. Pastikan exception ter-handle pada RailwayApp.
  */
 public class InvalidBookingException extends Exception {
 	/************ATRIBUT************/
@@ -19,6 +15,7 @@ public class InvalidBookingException extends Exception {
 	public InvalidBookingException() {
 	}
 
+	// method overloading dengan parameter message
 	public InvalidBookingException(String message) {
 		super(message);
 	}
