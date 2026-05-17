@@ -7,6 +7,9 @@ package exception;
 /**
  * Exception untuk menangani kondisi NIK penumpang tidak sesuai format.
  *
+ * TODO :
+ * 1. Standarisasi pesan error untuk validasi NIK.
+ * 2. Verifikasi exception ditangani benar di layer aplikasi.
  */
 public class InvalidNIKException extends Exception {
 	/************ATRIBUT************/
@@ -15,7 +18,6 @@ public class InvalidNIKException extends Exception {
 	public InvalidNIKException() {
 	}
 
-	// method overloading dengan parameter message
 	public InvalidNIKException(String message) {
 		super(message);
 	}

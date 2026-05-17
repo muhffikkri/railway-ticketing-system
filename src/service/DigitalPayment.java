@@ -3,75 +3,49 @@
  * Tanggal      : 23 Maret 2026
  */
 package service;
-import model.PaymentRecord;
+import exception.InvalidBookingException;
 
 /**
  * Implementasi awal metode pembayaran digital.
  *
+ * TODO Tim:
+ * 1. Implement logic processPayment dan validasi amount.
+ * 2. Hubungkan status pembayaran ke PaymentRecord.
+ * 3. Uji skenario nominal valid/invalid dan idempotency pembayaran.
  */
 public class DigitalPayment implements PaymentMethod {
-	/************ATRIBUT************/
+    /************ATRIBUT************/
     private String namaProvider;
-    private PaymentRecord record;
 
-	/************METHOD************/
-    // Menginisialisasi pembayaran digital dengan nilai default.
+    /************METHOD************/
     public DigitalPayment() {
         this.namaProvider = "";
-        this.record = null;
+    }
+    
+    public DigitalPayment(String providerName) {
+        this.namaProvider = providerName;
     }
 
-    // Menginisialisasi pembayaran digital dengan provider dan record tertentu.
-    public DigitalPayment(String namaProvider, PaymentRecord record) {
-        this.namaProvider = namaProvider;
-        this.record = record;
-    }
-
-    // Mengambil nama provider pembayaran digital.
     public String getNamaProvider() {
         return namaProvider;
     }
 
-    // Mengatur nama provider pembayaran digital.
     public void setNamaProvider(String namaProvider) {
         this.namaProvider = namaProvider;
     }
 
-    // Mengambil rekam pembayaran yang terhubung.
-    public PaymentRecord getRecord() {
-        return record;
-    }
-
-    // Mengatur rekam pembayaran yang akan disinkronkan.
-    public void setRecord(PaymentRecord record) {
-        this.record = record;
-    }
-
     @Override
-    // Memproses pembayaran dan menyinkronkan status transaksi secara aman.
-    public void processPayment(double amount) {
-        if (amount <= 0) {
-            if (record != null) {
-                record.syncPayment("FAILED", 0);
-            }
-            throw new IllegalArgumentException("Jumlah pembayaran harus lebih dari 0");
+    public void processPayment(double amount) throws InvalidBookingException {
+        if (namaProvider == null || namaProvider.isBlank()) {
+            throw new InvalidBookingException("Provider pembayaran digital tidak boleh kosong");
         }
-
-        if (record == null) {
-            throw new IllegalStateException("PaymentRecord belum dihubungkan");
+        if (Double.isNaN(amount) || Double.isInfinite(amount) || amount <= 0) {
+            throw new InvalidBookingException("Nominal pembayaran harus lebih dari 0");
         }
+        assert amount > 0 : "Nominal pembayaran harus > 0";
 
-        if (namaProvider == null || namaProvider.trim().isEmpty()) {
-            throw new IllegalStateException("Provider pembayaran digital belum diatur");
-        }
-
-        if (record.getStatus().equals("COMPLETED")) {
-            System.out.println("[IDEMPOTENCY] Pembayaran sudah COMPLETED. Tidak memproses ulang.");
-            return;
-        }
-
-        //Proses Pembayaran
-        System.out.println("Memproses pembayaran digital sebesar Rp " + String.format("%,.2f", amount) + " melalui " + namaProvider);
-        record.syncPayment("COMPLETED", amount);
+        // Skeleton method: hanya boundary & exception.
+        // TODO Tim: implement integrasi pembayaran dan update PaymentRecord.
+        throw new UnsupportedOperationException("processPayment belum diimplementasikan");
     }
 }

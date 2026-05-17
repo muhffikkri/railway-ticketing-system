@@ -1,130 +1,118 @@
 /* Nama File    : ScheduleService.java
- * Deskripsi    : Kelas layanan untuk manajemen jadwal
+ * Deskripsi    : Layanan untuk mengelola dan mencari jadwal perjalanan
  * Tanggal      : 23 Maret 2026
  */
+
 package service;
 
 import model.Schedule;
-import exception.ScheduleConflictException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import exception.ScheduleConflictException;
 
 /**
- * Kelas layanan yang mengelola data master jadwal perjalanan kereta api.
+ * Kelas service untuk menyimpan master jadwal dan menyediakan operasi pencarian.
+ * Semua fitur pencarian jadwal dipusatkan di sini (bukan di class model Schedule).
  */
 public class ScheduleService {
-	/************ATRIBUT************/
-    private List<Schedule> masterJadwal;
+    /************ATRIBUT************/
+    // List ini berperan seperti tabel jadwal 
+    private List<Schedule> masterJadwal = new ArrayList<>();
 
-	/************METHOD************/
-    // Membuat service jadwal dengan data master kosong.
-    public ScheduleService() {
-        this.masterJadwal = new ArrayList<>();
-    }
-
-    // Menambahkan jadwal baru jika tidak bentrok dengan jadwal kereta yang sama.
+    /************METHOD************/
     public void addSchedule(Schedule s) throws ScheduleConflictException {
         if (s == null) {
-            throw new IllegalArgumentException("Jadwal tidak boleh null");
+            throw new IllegalArgumentException("Schedule tidak boleh null");
         }
-
-        if (s.getTrain() == null || s.getDepartureTime() == null || s.getArrivalTime() == null) {
-            throw new IllegalArgumentException("Data jadwal belum lengkap");
+        if (s.getStationAsal() == null || s.getStationTujuan() == null || s.getTanggalBerangkat() == null) {
+            throw new IllegalArgumentException("Station asal/tujuan dan tanggal berangkat wajib diisi");
         }
+        List<Schedule> existing = searchSchedule(
+                s.getStationAsal().getNamaStasiun(),
+                s.getStationTujuan().getNamaStasiun(),
+                s.getTanggalBerangkat());
+        if (!existing.isEmpty()) {
+            throw new ScheduleConflictException("Jadwal sudah terisi dengan keberangkatan kereta lain");
+        }
+        masterJadwal.add(s);
+    }
 
-        for (Schedule existing : masterJadwal) {
-            if (existing.getTrain().getIdTrain().equals(s.getTrain().getIdTrain())) {
-                if (s.getDepartureTime().isBefore(existing.getArrivalTime()) && 
-                    s.getArrivalTime().isAfter(existing.getDepartureTime())) {
-                    throw new ScheduleConflictException("Kereta " + s.getTrain().getNamaTrain() + " sudah memiliki jadwal di waktu tersebut!");
-                }
+    // --- IMPLEMENTASI METHOD OVERLOADING ---
+
+    // ======= Pindahan dari Schedule (skeleton) =======
+    public Schedule cariJadwalById(String idSchedule) {
+        if (idSchedule == null || idSchedule.isBlank()) {
+            throw new IllegalArgumentException("idSchedule tidak boleh kosong");
+        }
+        assert !idSchedule.isBlank() : "idSchedule harus terisi";
+        // Skeleton method: boundary checks saja.
+        throw new UnsupportedOperationException("cariJadwalById belum diimplementasikan");
+    }
+
+    public Schedule cariJadwal(String kotaAsal, String kotaTujuan) {
+        if (kotaAsal == null || kotaAsal.isBlank() || kotaTujuan == null || kotaTujuan.isBlank()) {
+            throw new IllegalArgumentException("kotaAsal dan kotaTujuan tidak boleh kosong");
+        }
+        assert !kotaAsal.isBlank() && !kotaTujuan.isBlank() : "kotaAsal/kotaTujuan harus terisi";
+        // Skeleton method: boundary checks saja.
+        throw new UnsupportedOperationException("cariJadwal belum diimplementasikan");
+    }
+
+    public Schedule cariJadwal(String kotaAsal, String kotaTujuan, LocalDate tanggalBerangkat) {
+        if (kotaAsal == null || kotaAsal.isBlank() || kotaTujuan == null || kotaTujuan.isBlank() || tanggalBerangkat == null) {
+            throw new IllegalArgumentException("kotaAsal, kotaTujuan, dan tanggalBerangkat wajib diisi");
+        }
+        assert tanggalBerangkat != null : "tanggalBerangkat wajib diisi";
+        // Skeleton method: boundary checks saja.
+        throw new UnsupportedOperationException("cariJadwal belum diimplementasikan");
+    }
+
+    // Cari berdasarkan stasiun tujuan saja
+    public List<Schedule> searchSchedule(String tujuan) {
+        if (tujuan == null || tujuan.isBlank()) {
+            throw new IllegalArgumentException("Tujuan tidak boleh kosong");
+        }
+        List<Schedule> hasil = new ArrayList<>();
+        for (Schedule s : masterJadwal) {
+            if (s.getStationTujuan() != null && s.getStationTujuan().getNamaStasiun().equalsIgnoreCase(tujuan)) {
+                hasil.add(s);
             }
         }
-        this.masterJadwal.add(s);
+        return hasil;
     }
 
-    // Mencari jadwal berdasarkan ID jadwal.
-    public Schedule cariJadwalById(String idSchedule) {
-        if (idSchedule == null || idSchedule.trim().isEmpty()) {
-            return null;
-        }
-
-        return masterJadwal.stream()
-                .filter(s -> s.getScheduleId().equals(idSchedule))
-                .findFirst()
-                .orElse(null);
-    }
-
-    // Mencari jadwal berdasarkan kota asal dan kota tujuan.
-    public List<Schedule> cariJadwal(String kotaAsal, String kotaTujuan) {
-        if (kotaAsal == null || kotaTujuan == null) {
-            return new ArrayList<>();
-        }
-
-        return masterJadwal.stream()
-                .filter(s -> s.getDepartureStasion().getKota().equalsIgnoreCase(kotaAsal) &&
-                             s.getArrivalStasion().getKota().equalsIgnoreCase(kotaTujuan))
-                .collect(Collectors.toList());
-    }
-
-    // Mencari jadwal berdasarkan kota asal, kota tujuan, dan tanggal berangkat.
-    public List<Schedule> cariJadwal(String kotaAsal, String kotaTujuan, LocalDate tanggalBerangkat) {
-        if (kotaAsal == null || kotaTujuan == null || tanggalBerangkat == null) {
-            return new ArrayList<>();
-        }
-
-        return masterJadwal.stream()
-                .filter(s -> s.getDepartureStasion().getKota().equalsIgnoreCase(kotaAsal) &&
-                             s.getArrivalStasion().getKota().equalsIgnoreCase(kotaTujuan) &&
-                             s.getDepartureTime().toLocalDate().equals(tanggalBerangkat))
-                .collect(Collectors.toList());
-    }
-
-    // Mencari jadwal berdasarkan kota atau nama stasiun tujuan.
-    public List<Schedule> searchSchedule(String tujuan) {
-        if (tujuan == null) {
-            return new ArrayList<>();
-        }
-
-        return masterJadwal.stream()
-                .filter(s -> s.getArrivalStasion().getKota().equalsIgnoreCase(tujuan) ||
-                             s.getArrivalStasion().getNamaStasion().equalsIgnoreCase(tujuan))
-                .collect(Collectors.toList());
-    }
-
-    // Mencari jadwal berdasarkan asal dan tujuan (kota atau nama stasiun).
+    // Cari berdasarkan asal DAN tujuan (Overloading)
     public List<Schedule> searchSchedule(String asal, String tujuan) {
-        if (asal == null || tujuan == null) {
-            return new ArrayList<>();
+        if (asal == null || asal.isBlank() || tujuan == null || tujuan.isBlank()) {
+            throw new IllegalArgumentException("Asal dan tujuan tidak boleh kosong");
         }
-
-        return masterJadwal.stream()
-                .filter(s -> (s.getDepartureStasion().getKota().equalsIgnoreCase(asal) ||
-                              s.getDepartureStasion().getNamaStasion().equalsIgnoreCase(asal)) &&
-                             (s.getArrivalStasion().getKota().equalsIgnoreCase(tujuan) ||
-                              s.getArrivalStasion().getNamaStasion().equalsIgnoreCase(tujuan)))
-                .collect(Collectors.toList());
+        List<Schedule> hasil = new ArrayList<>();
+        for (Schedule s : masterJadwal) {
+            if (s.getStationAsal() != null && s.getStationTujuan() != null
+                    && s.getStationAsal().getNamaStasiun().equalsIgnoreCase(asal)
+                    && s.getStationTujuan().getNamaStasiun().equalsIgnoreCase(tujuan)) {
+                hasil.add(s);
+            }
+        }
+        return hasil;
     }
 
-    // Mencari jadwal berdasarkan asal, tujuan, dan tanggal berangkat.
-    public List<Schedule> searchSchedule(String asal, String tujuan, LocalDate tanggalBerangkat) {
-        if (asal == null || tujuan == null || tanggalBerangkat == null) {
-            return new ArrayList<>();
+    // Cari berdasarkan asal, tujuan, dan tanggal (Overloading)
+    public List<Schedule> searchSchedule(String asal, String tujuan, java.time.LocalDate tanggalBerangkat) {
+        if (asal == null || asal.isBlank() || tujuan == null || tujuan.isBlank() || tanggalBerangkat == null) {
+            throw new IllegalArgumentException("Asal, tujuan, dan tanggal berangkat wajib diisi");
         }
-
-        return masterJadwal.stream()
-                .filter(s -> (s.getDepartureStasion().getKota().equalsIgnoreCase(asal) ||
-                              s.getDepartureStasion().getNamaStasion().equalsIgnoreCase(asal)) &&
-                             (s.getArrivalStasion().getKota().equalsIgnoreCase(tujuan) ||
-                              s.getArrivalStasion().getNamaStasion().equalsIgnoreCase(tujuan)) &&
-                             s.getDepartureTime().toLocalDate().equals(tanggalBerangkat))
-                .collect(Collectors.toList());
-    }
-
-    // Mengambil salinan daftar master jadwal agar data internal tetap aman.
-    public List<Schedule> getMasterJadwal() {
-        return new ArrayList<>(masterJadwal);
+        List<Schedule> hasil = new ArrayList<>();
+        for (Schedule s : masterJadwal) {
+            if (s.getStationAsal() != null && s.getStationTujuan() != null && s.getTanggalBerangkat() != null
+                    && s.getStationAsal().getNamaStasiun().equalsIgnoreCase(asal)
+                    && s.getStationTujuan().getNamaStasiun().equalsIgnoreCase(tujuan)
+                    && s.getTanggalBerangkat().equals(tanggalBerangkat)) {
+                hasil.add(s);
+            }
+        }
+        return hasil;
     }
 }

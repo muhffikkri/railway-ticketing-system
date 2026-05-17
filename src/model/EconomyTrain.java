@@ -1,55 +1,55 @@
 /* Nama File    : EconomyTrain.java
- * Deskripsi    : Kelas turunan Train untuk kereta ekonomi
+ * Deskripsi    : Turunan Train untuk layanan kereta ekonomi
  * Tanggal      : 23 Maret 2026
  */
 package model;
 
 /**
  * Merepresentasikan kereta kelas ekonomi.
+ * Menyediakan placeholder perhitungan tarif khusus economy.
  *
+ * TODO :
+ * 1. Tentukan formula tarif economy.
+ * 2. Sinkronisasi atribut dengan kebutuhan Schedule.
+ * 3. Uji batas jarak minimum dan maksimum untuk tarif.
  */
 public class EconomyTrain extends Train {
-	/************ATRIBUT************/
-    private int luggageLimit;
+    /************ATRIBUT************/
+    private double discountRate;
 
-	/************METHOD************/
-    // Menginisialisasi kereta ekonomi dengan nilai default.
+    /************METHOD************/
     public EconomyTrain() {
         super();
-        this.luggageLimit = 0;
+        this.discountRate = 0;
     }
 
-    // Menginisialisasi kereta ekonomi dengan data lengkap.
-    public EconomyTrain(String idTrain, String namaTrain, int kapasitas, int luggageLimit, double discountRate) {
-        super(idTrain, namaTrain, kapasitas, discountRate);
-            setLuggageLimit(luggageLimit);
+    public EconomyTrain(String idTrain, String namaKereta, int kapasitas, double discountRate) {
+        super(idTrain, namaKereta, kapasitas);
+        this.discountRate = discountRate;
     }
 
-    // Mengambil batas bagasi untuk penumpang kereta ekonomi.
-    public int getLuggageLimit() {
-        return luggageLimit;
+    public double getDiscountRate() {
+        return discountRate;
     }
 
-    // Mengatur batas bagasi agar tidak bernilai negatif.
-    public void setLuggageLimit(int luggageLimit) {
-        if (luggageLimit < 0) {
-            throw new IllegalArgumentException("Batas bagasi tidak boleh negatif");
-        }
-        this.luggageLimit = luggageLimit;
+    public void setDiscountRate(double discountRate) {
+        this.discountRate = discountRate;
     }
 
     @Override
-    // Menghitung tarif kereta ekonomi berdasarkan tarif dasar dan diskon.
-    public double hitungTarif() {
-        return getTarifDasar() - (getTarifDasar() * getDiscountRate());
+    public double hitungTarif(int jarak) {
+        // Tarif ekonomi: Rp 1000 per km dengan diskon
+        double baseTarif = jarak * 1000;
+        double discountedTarif = baseTarif * (1 - discountRate);
+        return discountedTarif;
     }
 
     @Override
-    // Menampilkan data kereta ekonomi ke konsol.
     public void printInfo() {
-        super.printInfo();
-        System.out.println("===== Kelas: Ekonomi =====");
-        System.out.println("Batas Bagasi: " + luggageLimit + " kg");
-        System.out.println("Tarif: Rp." + hitungTarif());
+        System.out.println("=== Kereta Ekonomi ===");
+        System.out.println("ID: " + getIdTrain());
+        System.out.println("Nama: " + getNamaKereta());
+        System.out.println("Kapasitas: " + getKapasitas());
+        System.out.println("Discount Rate: " + (discountRate * 100) + "%");
     }
 }

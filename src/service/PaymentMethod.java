@@ -1,16 +1,22 @@
 /* Nama File    : PaymentMethod.java
- * Deskripsi    : Interface untuk metode pembayaran
+ * Deskripsi    : Interface untuk strategi metode pembayaran
  * Tanggal      : 23 Maret 2026
  */
 package service;
 
+import exception.InvalidBookingException;
+
 /**
- * Interface yang menyediakan metode processPayment() untuk memproses pembayaran.
+ * Kontrak interface untuk seluruh metode pembayaran pada sistem.
+ *
+ * TODO Tim:
+ * 1. Finalisasi kontrak processPayment(double amount).
+ * 2. Definisikan format nilai amount yang valid.
+ * 3. Siapkan mock implementasi untuk pengujian integrasi.
  */
 public interface PaymentMethod {
-	/************ATRIBUT************/
+    /************ATRIBUT************/
 
-	/************METHOD************/
-    // Menjalankan proses pembayaran sesuai implementasi metode yang digunakan.
-    void processPayment(double amount);
+    /************METHOD************/
+    void processPayment(double amount) throws InvalidBookingException;
 }
